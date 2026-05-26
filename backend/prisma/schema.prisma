@@ -1,0 +1,12 @@
+// Prismaスキーマファイル
+// モデルの詳細設計はタスク2.1で行う
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
