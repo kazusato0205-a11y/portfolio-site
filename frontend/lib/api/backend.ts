@@ -4,18 +4,26 @@ if (!BACKEND_URL) {
   throw new Error("BACKEND_URL が設定されていません。.env.local を確認してください。");
 }
 
-export async function fetchBackend<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BACKEND_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
-  });
+export async function fetchFromBackend<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${BACKEND_URL}${cleanEndpoint}`;
 
-  if (!res.ok) {
-    throw new Error(`バックエンドへのリクエストが失敗しました: ${res.status} ${path}`);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`バックエンド通信エラー: ${response.status} ${endpoint}`);
+    }
+
+    return response.json() as Promise<T>;
+  } catch (error) {
+    console.error("Expressへの接続に失敗しました:", error);
+    throw error;
   }
-
-  return res.json() as Promise<T>;
 }
