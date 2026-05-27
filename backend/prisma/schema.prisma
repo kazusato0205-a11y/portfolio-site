@@ -1,12 +1,57 @@
-// Prismaスキーマファイル
-// モデルの詳細設計はタスク2.1で行う
-
+// 1. 道具（クライアント）を作るための設定
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
+// 2. データベース（倉庫）への接続設定（環境変数から読み込む）
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql" 
+}
+
+// ==========================================
+// 3. データ構造（テーブル）の定義
+// ==========================================
+
+// プロフィール情報
+model Profile {
+  id            Int      @id @default(autoincrement())
+  name          String
+  bio           String
+  avatarImage   Image?   @relation(fields: [avatarImageId], references: [id])
+  avatarImageId Int?     @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// 実績（Works）
+model Work {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  image       Image?   @relation(fields: [imageId], references: [id])
+  imageId     Int?     @unique
+  link        String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// スキル（Skills）
+model Skill {
+  id        Int      @id @default(autoincrement())
+  name      String
+  level     Int
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// 画像データ管理（管理画面からのアップロード用）
+model Image {
+  id        Int      @id @default(autoincrement())
+  url       String
+  filename  String
+  createdAt DateTime @default(now())
+  profile   Profile?
+  work      Work?
 }
