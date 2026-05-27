@@ -1,10 +1,10 @@
-import { fetchBackend } from "@/lib/api/backend";
+import { fetchFromBackend } from "@/lib/api/backend";
 
 type HealthResponse = { status: string };
 
 async function getBackendStatus(): Promise<"ok" | "error"> {
   try {
-    const data = await fetchBackend<HealthResponse>("/health");
+    const data = await fetchFromBackend<HealthResponse>("/health");
     return data.status === "ok" ? "ok" : "error";
   } catch {
     return "error";
