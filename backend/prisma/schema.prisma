@@ -7,6 +7,7 @@ generator client {
 // 2. データベース（倉庫）への接続設定（環境変数から読み込む）
 datasource db {
   provider = "postgresql" 
+  url      = env("DATABASE_URL")
 }
 
 // ==========================================
