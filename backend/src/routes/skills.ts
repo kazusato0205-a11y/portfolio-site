@@ -27,9 +27,13 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 router.put("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id));
   const { name, level, category } = req.body;
   try {
+    const existingSkill = await prisma.skill.findUnique({ where: { id } });
+    if (!existingSkill) {
+      return res.status(404).json({ error: "更新対象のスキルが見つかりません" });
+    }
     const skill = await prisma.skill.update({
       where: { id },
       data: { name, level, category },
@@ -41,10 +45,14 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 router.delete("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id));
   try {
+    const existingSkill = await prisma.skill.findUnique({ where: { id } });
+    if (!existingSkill) {
+      return res.status(404).json({ error: "削除対象のスキルが見つかりません" });
+    }
     await prisma.skill.delete({ where: { id } });
-    res.status(204).send();
+    res.json({ message: "スキルを削除しました" });
   } catch {
     res.status(500).json({ error: "スキルの削除に失敗しました" });
   }

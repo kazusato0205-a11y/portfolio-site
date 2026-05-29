@@ -16,7 +16,7 @@ router.get("/", async (_req: Request, res: Response) => {
 });
 
 router.get("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id));
   try {
     const work = await prisma.work.findUnique({
       where: { id },
@@ -46,9 +46,14 @@ router.post("/", async (req: Request, res: Response) => {
 });
 
 router.put("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id));
   const { title, description, imageId, link } = req.body;
+  
   try {
+    const existingWork = await prisma.work.findUnique({ where: { id } });
+    if (!existingWork) {
+      return res.status(404).json({ error: "更新対象の作品が見つかりません" });
+    }
     const work = await prisma.work.update({
       where: { id },
       data: { title, description, imageId, link },
@@ -61,10 +66,14 @@ router.put("/:id", async (req: Request, res: Response) => {
 });
 
 router.delete("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id));
   try {
+    const existingWork = await prisma.work.findUnique({ where: { id } });
+    if (!existingWork) {
+      return res.status(404).json({ error: "削除対象の作品が見つかりません" });
+    }
     await prisma.work.delete({ where: { id } });
-    res.status(204).send();
+    res.json({ message: "作品を削除しました" });
   } catch {
     res.status(500).json({ error: "実績の削除に失敗しました" });
   }

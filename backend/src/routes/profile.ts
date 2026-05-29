@@ -15,7 +15,7 @@ router.get("/", async (_req: Request, res: Response) => {
 });
 
 router.put("/:id", async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
+  const id = parseInt(String(req.params.id));
   const { name, bio, avatarImageId } = req.body;
   
   try {
