@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const router = Router();
 
@@ -24,25 +25,22 @@ router.delete("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "削除対象の画像が見つかりません" });
     }
 
-    // Profileモデルでこの画像が使われているか（参照されているか）調べる
-    const isUsedInProfile = await prisma.profile.findFirst({
-      where: { avatarImageId: id }
-    });
-
-    // Workモデルでこの画像が使われているか調べる
-    const isUsedInWork = await prisma.work.findFirst({
-      where: { imageId: id } // ※モデル側の実際のカラム名（imageIdなど）に合わせてください
-    });
-
-    //もしどちらか一方で使われていたら、エラー（400）を返して削除をブロックする
-    if (isUsedInProfile || isUsedInWork) {
-      return res.status(400).json({ 
-        error: "この画像はプロフィールまたは作品実績で使用中のため、削除できません" 
-      });
-    }
     await prisma.image.delete({ where: { id } });
     res.json({ message: "画像を削除しました" });
-  } catch {
+  } catch (error) {
+    // 💡 3. もしエラーが発生し、それが「外部キー制約（他のデータが参照中）」によるものなら400を返す
+    if (error && typeof error === "object" && "code" in error) {
+    // 2. さらに、それがPrismaの特定のエラー型であるかチェックする
+    if (error instanceof PrismaClientKnownRequestError) {
+      if (error.code === "P2003") {
+        return res.status(400).json({
+          error: "この画像はプロフィールまたは作品実績で使用中のため、削除できません",
+        });
+      }
+    }
+  }
+
+    // それ以外の本当のシステムエラーは500を返す
     res.status(500).json({ error: "画像の削除に失敗しました" });
   }
 });
