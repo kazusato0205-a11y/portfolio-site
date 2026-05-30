@@ -1,50 +1,79 @@
+//データを取りに行く「司令塔」
 import { fetchFromBackend } from "@/lib/api/backend";
+import ProfileSection from "@/components/ProfileSection";
+import WorksSection from "@/components/WorksSection";
+import SkillsSection from "@/components/SkillsSection";
 
-type HealthResponse = { status: string };
+type Profile = {
+  id: number;
+  name: string;
+  bio: string;
+  avatarImage: {
+    id: number;
+    url: string;
+    filename: string;
+  } | null;
+};
 
-async function getBackendStatus(): Promise<"ok" | "error"> {
+type Work = {
+  id: number;
+  title: string;
+  description: string;
+  image: {
+    id: number;
+    url: string;
+    filename: string;
+  } | null;
+  link: string | null;
+};
+
+type Skill = {
+  id: number;
+  name: string;
+  level: number;
+  category: string;
+};
+
+//async function → 「時間がかかる作業をする関数」という意味。データを取りに行く間、待つことができる
+//Promise<Profile | null> → 「最終的に Profile か null を返しますよ」という約束の型
+async function getProfile(): Promise<Profile | null> {
+  //try { ... } catch { return null } → データ取得に失敗しても、エラーで止まらず null（何もない）を返して安全に終わる
   try {
-    const data = await fetchFromBackend<HealthResponse>("/health");
-    return data.status === "ok" ? "ok" : "error";
+    // await fetchFromBackend("/profile") → バックエンドの /profile というURLにデータを取りに行く。await は「取ってくるまで待つ」という命令
+    return await fetchFromBackend<Profile>("/profile");
   } catch {
-    return "error";
+    return null;
+  }
+}
+
+async function getWorks(): Promise<Work[]> {
+  try {
+    return await fetchFromBackend<Work[]>("/works");
+  } catch {
+    return [];
+  }
+}
+
+async function getSkills(): Promise<Skill[]> {
+  try {
+    return await fetchFromBackend<Skill[]>("/skills");
+  } catch {
+    return [];
   }
 }
 
 export default async function Home() {
-  const backendStatus = await getBackendStatus();
+  const [profile, works, skills] = await Promise.all([
+    getProfile(),
+    getWorks(),
+    getSkills(),
+  ]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-      <main className="flex flex-col items-center gap-6 p-16 text-center">
-        <h1 className="text-2xl font-semibold text-black dark:text-white">
-          Portfolio Site
-        </h1>
-        <div className="flex flex-col gap-2 text-sm">
-          <StatusRow label="Frontend (Next.js)" status="ok" />
-          <StatusRow label="Backend (Express)" status={backendStatus} />
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function StatusRow({ label, status }: { label: string; status: "ok" | "error" }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span
-        className={`inline-block h-2.5 w-2.5 rounded-full ${
-          status === "ok" ? "bg-green-500" : "bg-red-500"
-        }`}
-      />
-      <span className="text-zinc-700 dark:text-zinc-300">{label}</span>
-      <span
-        className={`font-mono font-medium ${
-          status === "ok" ? "text-green-600" : "text-red-500"
-        }`}
-      >
-        {status}
-      </span>
+    <div className="bg-white">
+      <ProfileSection profile={profile} />
+      <WorksSection works={works} />
+      <SkillsSection skills={skills} />
     </div>
   );
 }
