@@ -89,12 +89,12 @@ export async function deleteSkill(id: number): Promise<DeleteResult> {
   }
 }
 
-// 画像を登録（Base64 データURLをそのまま url フィールドに保存）
-export async function uploadImage(data: { url: string; filename: string }): Promise<DeleteResult> {
+// 画像を登録（FormData でそのまま Express に転送し、サーバー側で Base64 変換して DB 保存）
+export async function uploadImage(formData: FormData): Promise<DeleteResult> {
   try {
     await fetchFromBackend("/images", {
       method: "POST",
-      body: JSON.stringify(data),
+      body: formData,
     });
     revalidatePath("/admin/dashboard");
     return { success: true };

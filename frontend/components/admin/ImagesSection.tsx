@@ -20,7 +20,6 @@ export default function ImagesSection({ images, profileId }: Props) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 5MB 以上は警告
     if (file.size > 5 * 1024 * 1024) {
       setUploadError("ファイルサイズは 5MB 以下にしてください");
       return;
@@ -28,20 +27,17 @@ export default function ImagesSection({ images, profileId }: Props) {
 
     setUploadError(null);
 
-    // FileReader で Base64 に変換してから Server Action に渡す
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      startTransition(async () => {
-        const result = await uploadImage({ url: base64, filename: file.name });
-        if (result.success) {
-          if (inputRef.current) inputRef.current.value = "";
-        } else {
-          setUploadError(result.error ?? "アップロードに失敗しました");
-        }
-      });
-    };
-    reader.readAsDataURL(file);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    startTransition(async () => {
+      const result = await uploadImage(formData);
+      if (result.success) {
+        if (inputRef.current) inputRef.current.value = "";
+      } else {
+        setUploadError(result.error ?? "アップロードに失敗しました");
+      }
+    });
   }
 
   function handleSetAvatar(imageId: number) {

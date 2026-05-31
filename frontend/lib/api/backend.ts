@@ -8,13 +8,18 @@ export async function fetchFromBackend<T>(endpoint: string, options: RequestInit
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BACKEND_URL}${cleanEndpoint}`;
 
+  // FormData を body に渡す場合は Content-Type を設定しない（fetch が boundary 付きで自動セットする）
+  const isFormData = options.body instanceof FormData;
+
   try {
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers: isFormData
+        ? options.headers
+        : {
+            "Content-Type": "application/json",
+            ...options.headers,
+          },
     });
 
     if (!response.ok) {
