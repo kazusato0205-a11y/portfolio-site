@@ -19,9 +19,15 @@ export async function POST(request: Request) {
   return response;
 }
 
-// ログアウト時に呼ばれる：セッションクッキーを削除する
+// ログアウト時に呼ばれる：maxAge: -1 でクッキーを即時破棄する
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });
-  response.cookies.delete("session");
+  response.cookies.set("session", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: -1,
+    path: "/",
+  });
   return response;
 }

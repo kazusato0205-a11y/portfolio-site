@@ -2,8 +2,6 @@
 
 import { fetchFromBackend } from "@/lib/api/backend";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 type ActionResult = { error?: string; success?: boolean } | null;
 
@@ -117,9 +115,3 @@ export async function deleteImage(id: number) {
   }
 }
 
-// ログアウト
-export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.delete("session");
-  redirect("/admin/login");
-}
