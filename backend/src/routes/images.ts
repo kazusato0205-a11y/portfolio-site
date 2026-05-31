@@ -50,29 +50,30 @@ router.delete("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "削除対象の画像が見つかりません" });
     }
 
-    // DB レコードを先に削除する（失敗時はファイルに触らず500を返す → 整合した状態を維持）
+    // DB レコードを先に削除する（失敗時はファイルに触らず 500 を返す → 整合した状態を維持）
     await prisma.image.delete({ where: { id } });
 
-    // DB 削除後にファイルをベストエフォートで削除する
-    // 失敗しても DB は既にクリーンなためユーザーには見えず、孤立ファイルとしてのみ残る
+    // 実ファイルの削除（ベストエフォート）
+    // DB レコードが消えた時点でアプリ上の「削除」は完了しているため、
+    // ファイル削除の失敗を理由に 500 を返すことはしない（DB はクリーンなのにエラー扱いになり混乱を招く）。
+    // ENOENT（既に存在しない）は正常完了として扱い、それ以外はログに記録して手動対応を促す。
     const filePath = path.join(UPLOADS_DIR, path.basename(existingImage.url));
-    await fs.promises.unlink(filePath).catch((err: NodeJS.ErrnoException) => {
+    try {
+      await fs.promises.unlink(filePath);
+    } catch (fileErr) {
+      const err = fileErr as NodeJS.ErrnoException;
       if (err.code !== "ENOENT") {
-        console.error(`孤立ファイルの削除に失敗（手動クリーンアップが必要）: ${filePath}`);
+        console.error(`孤立ファイルの削除に失敗（手動クリーンアップが必要）: ${filePath}`, err);
       }
-    });
+    }
 
     return res.json({ message: "画像を削除しました" });
 
   } catch (error) {
-    if (error && typeof error === "object" && "code" in error) {
-      if (error instanceof PrismaClientKnownRequestError) {
-        if (error.code === "P2003") {
-          return res.status(400).json({
-            error: "この画像はプロフィールまたは作品実績で使用中のため、削除できません",
-          });
-        }
-      }
+    if (error instanceof PrismaClientKnownRequestError && error.code === "P2003") {
+      return res.status(400).json({
+        error: "この画像はプロフィールまたは作品実績で使用中のため、削除できません",
+      });
     }
     return res.status(500).json({ error: "画像の削除に失敗しました" });
   }
