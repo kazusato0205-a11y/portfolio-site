@@ -68,3 +68,170 @@
 - `/admin/login` : 管理者ログインページ
 - `/admin/dashboard` : 管理画面（コンテンツ編集・画像アップロード）
   - ※未認証時は404を返す制御を実装
+
+---
+
+## 4. 起動手順
+
+### 4.1 前提条件
+
+以下がインストール済みであること。
+
+- [Node.js](https://nodejs.org/) v20 以上
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+---
+
+### 4.2 環境変数の設定
+
+#### `backend/.env`
+
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/portfolio_db"
+
+FIREBASE_PROJECT_ID="your-project-id"
+FIREBASE_CLIENT_EMAIL="your-client-email"
+FIREBASE_PRIVATE_KEY="your-private-key"
+```
+
+#### `frontend/.env.local`
+
+```env
+BACKEND_URL="http://localhost:4000/api"
+
+NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-project.appspot.com"
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
+NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
+```
+
+> ⚠️ `.env` と `.env.local` は `.gitignore` に含まれています。リポジトリにはコミットしないでください。
+
+---
+
+### 4.3 初回セットアップ
+
+```bash
+# 1. 依存パッケージをインストール
+cd frontend && npm install
+cd ../backend && npm install
+
+# 2. データベースを起動（Docker）
+cd .. && docker compose up -d
+
+# 3. DBにテーブルを作成（マイグレーション）
+cd backend && npm run db:migrate
+
+# 4. Prisma クライアントを生成
+npm run db:generate
+```
+
+---
+
+### 4.4 開発サーバーの起動
+
+ターミナルを **2つ** 開いて、それぞれ実行します。
+
+**ターミナル① — バックエンド（Express）**
+
+```bash
+cd backend
+npm run dev
+# → http://localhost:4000 で起動
+```
+
+**ターミナル② — フロントエンド（Next.js）**
+
+```bash
+cd frontend
+npm run dev
+# → http://localhost:3000 で起動
+```
+
+---
+
+### 4.5 起動確認
+
+| URL | 内容 |
+|---|---|
+| `http://localhost:3000` | トップページ（一般向け） |
+| `http://localhost:3000/contact` | コンタクトページ |
+| `http://localhost:3000/admin/login` | 管理者ログインページ |
+| `http://localhost:3000/admin/dashboard` | 管理ダッシュボード（要ログイン） |
+| `http://localhost:4000/health` | バックエンド稼働確認 |
+
+---
+
+## 5. ディレクトリ構成
+
+```
+portfolio-site/
+├── docker-compose.yml               # PostgreSQL をDockerで起動する設定
+├── README.md                        # プロジェクト概要・要件定義（このファイル）
+├── TASKS.md                         # 開発タスク一覧・進捗管理
+│
+├── frontend/                        # Next.js（画面側）
+│   ├── middleware.ts                 # ルート保護（/admin/* への未認証アクセスを 404 で遮断）
+│   ├── next.config.ts               # Next.js 設定（外部画像ドメイン許可等）
+│   │
+│   ├── app/                         # App Router のページ・API ルート
+│   │   ├── layout.tsx               # ルートレイアウト（html/body のみ・Header/Footer なし）
+│   │   ├── globals.css              # グローバルスタイル
+│   │   │
+│   │   ├── (marketing)/             # ルートグループ：一般公開ページ（URL に影響しない）
+│   │   │   ├── layout.tsx           # 公開ページ共通レイアウト（Header・Footer を配置）
+│   │   │   ├── page.tsx             # トップページ（Profile・Works・Skills を表示）
+│   │   │   └── contact/
+│   │   │       └── page.tsx         # コンタクトページ（問い合わせフォーム UI）
+│   │   │
+│   │   ├── admin/                   # 管理者エリア（middleware で認証保護）
+│   │   │   ├── layout.tsx           # 管理画面レイアウト（Header/Footer なし）
+│   │   │   ├── login/
+│   │   │   │   └── page.tsx         # 管理者ログインページ（Firebase 認証）
+│   │   │   └── dashboard/
+│   │   │       ├── page.tsx         # 管理ダッシュボード（コンテンツ一覧・編集）
+│   │   │       └── actions.ts       # Server Actions（プロフィール・実績・スキル・画像の CRUD）
+│   │   │
+│   │   └── api/
+│   │       ├── auth/session/
+│   │       │   └── route.ts         # POST: セッションクッキー発行 / DELETE: 削除
+│   │       └── health/
+│   │           └── route.ts         # GET: バックエンド接続確認
+│   │
+│   ├── components/                  # 再利用可能な UI コンポーネント
+│   │   ├── Header.tsx               # ナビゲーションバー（公開ページ用）
+│   │   ├── Footer.tsx               # フッター（公開ページ用）
+│   │   ├── ProfileSection.tsx       # トップページ：プロフィール表示
+│   │   ├── WorksSection.tsx         # トップページ：実績カードグリッド表示
+│   │   ├── SkillsSection.tsx        # トップページ：スキル一覧（カテゴリ別）
+│   │   └── admin/
+│   │       ├── LogoutButton.tsx     # Firebase サインアウト＋クッキー削除ボタン
+│   │       ├── ProfileEditForm.tsx  # プロフィール編集フォーム
+│   │       ├── WorksEditSection.tsx # 実績の一覧・追加・削除
+│   │       ├── SkillsEditSection.tsx# スキルの一覧・追加・削除
+│   │       └── ImagesSection.tsx    # 画像のアップロード・アバター設定・削除
+│   │
+│   └── lib/                         # ユーティリティ・外部サービス連携
+│       ├── api/
+│       │   └── backend.ts           # Express API への共通フェッチ関数
+│       ├── firebase/
+│       │   └── client.ts            # Firebase 初期化（ブラウザ用クライアント SDK）
+│       └── hooks/
+│           └── useAuth.ts           # ログイン状態を監視するカスタムフック
+│
+└── backend/                         # Express.js（API サーバー側）
+    ├── prisma/
+    │   └── schema.prisma            # DB テーブル設計（Profile・Work・Skill・Image）
+    └── src/
+        ├── index.ts                 # Express サーバー起動・全ルーターの登録
+        ├── lib/
+        │   ├── prisma.ts            # Prisma クライアント初期化（DB 接続管理）
+        │   └── firebase-admin.ts    # Firebase Admin SDK 初期化（サーバー用）
+        └── routes/
+            ├── profile.ts           # GET・PUT  /api/profile
+            ├── works.ts             # GET・POST・PUT・DELETE  /api/works
+            ├── skills.ts            # GET・POST・PUT・DELETE  /api/skills
+            └── images.ts            # GET・POST・DELETE  /api/images
+```

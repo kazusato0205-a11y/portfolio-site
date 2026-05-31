@@ -1,15 +1,21 @@
-//外の画像を使う許可証
 import type { NextConfig } from "next";
 
+const BACKEND_ORIGIN =
+  process.env.BACKEND_URL?.replace("/api", "") ?? "http://localhost:4000";
+
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
+  },
+  async rewrites() {
+    return [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
+        source: "/uploads/:path*",
+        destination: `${BACKEND_ORIGIN}/uploads/:path*`,
       },
-    ],
+    ];
   },
 };
 

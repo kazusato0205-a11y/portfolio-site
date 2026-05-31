@@ -17,22 +17,23 @@ router.get("/", async (_req: Request, res: Response) => {
 router.put("/:id", async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id));
   const { name, bio, avatarImageId } = req.body;
-  
-  try {
-    // 💡 1. まず、更新しようとしているプロフィールが本当に存在するか確認する
-    const existingProfile = await prisma.profile.findUnique({
-      where: { id },
-    });
 
-    // 💡 2. もし見つからなかったら（nullだったら）、404エラーで親切に返す
+  try {
+    const existingProfile = await prisma.profile.findUnique({ where: { id } });
     if (!existingProfile) {
       return res.status(404).json({ error: "更新対象のプロフィールが見つかりません" });
     }
 
-    // 💡 3. 存在することが分かってから、安全に更新処理を実行する
+    // 送られてきた項目だけを明示的に詰める（undefined は「変更なし」として除外）
+    // avatarImageId: null を送ると解除、number を送ると設定、undefined を送ると変更なし
+    const data: { name?: string; bio?: string; avatarImageId?: number | null } = {};
+    if (name          !== undefined) data.name          = name;
+    if (bio           !== undefined) data.bio           = bio;
+    if (avatarImageId !== undefined) data.avatarImageId = avatarImageId;
+
     const profile = await prisma.profile.update({
       where: { id },
-      data: { name, bio, avatarImageId },
+      data,
       include: { avatarImage: true },
     });
     res.json(profile);

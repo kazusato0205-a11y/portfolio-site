@@ -1,5 +1,31 @@
+# 依存パッケージ
 node_modules/
-dist/
-.env
 
+# ビルド成果物
+dist/
+
+# 環境変数（すべての派生ファイルを対象にする）
+.env
+.env.*
+*.local
+
+# Prisma 自動生成ファイル
 /src/generated/prisma
+
+# 証明書・秘密鍵
+*.pem
+*.key
+*.cert
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ログ
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# アップロード済み画像（フォルダ自体は管理対象、中身は除外）
+/public/uploads/*
+!/public/uploads/.gitkeep

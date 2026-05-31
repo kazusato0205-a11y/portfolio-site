@@ -8,11 +8,17 @@ export async function fetchFromBackend<T>(endpoint: string, options: RequestInit
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BACKEND_URL}${cleanEndpoint}`;
 
+  // body が文字列（JSON.stringify の戻り値）のときだけ Content-Type: application/json を付与する
+  // FormData のときは fetch が boundary 付きで自動セットするため付与しない
+  // body なし（GET/DELETE）や将来の Blob 等は呼び出し元が明示的にヘッダーを渡す
+  const contentTypeHeader: Record<string, string> =
+    typeof options.body === "string" ? { "Content-Type": "application/json" } : {};
+
   try {
     const response = await fetch(url, {
       ...options,
       headers: {
-        "Content-Type": "application/json",
+        ...contentTypeHeader,
         ...options.headers,
       },
     });
