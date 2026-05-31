@@ -103,7 +103,7 @@ export async function uploadImage(formData: FormData): Promise<DeleteResult> {
   }
 }
 
-// 画像をプロフィールのアバターに設定
+// 画像をプロフィールのアバターに設定（解除する場合は imageId: null を渡す経路を別途追加すること）
 export async function setProfileAvatar(profileId: number, imageId: number): Promise<DeleteResult> {
   try {
     await fetchFromBackend(`/profile/${profileId}`, {

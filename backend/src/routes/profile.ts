@@ -24,7 +24,8 @@ router.put("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "更新対象のプロフィールが見つかりません" });
     }
 
-    // 送られてきた項目だけを明示的に詰める（undefined は除外）
+    // 送られてきた項目だけを明示的に詰める（undefined は「変更なし」として除外）
+    // avatarImageId: null を送ると解除、number を送ると設定、undefined を送ると変更なし
     const data: { name?: string; bio?: string; avatarImageId?: number | null } = {};
     if (name          !== undefined) data.name          = name;
     if (bio           !== undefined) data.bio           = bio;
