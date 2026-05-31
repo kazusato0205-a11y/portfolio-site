@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// 認証なしでアクセス可能な管理画面パス
+const PUBLIC_ADMIN_PATHS = ["/admin/login"];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // /admin/login 以外の /admin/* はセッションクッキーが必要
-  if (pathname !== "/admin/login") {
+  const isProtected = !PUBLIC_ADMIN_PATHS.includes(pathname);
+  if (isProtected) {
     const session = request.cookies.get("session");
     if (!session?.value) {
       // リダイレクトではなく HTTP 404 を返す（要件）
