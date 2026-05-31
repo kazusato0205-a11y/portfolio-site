@@ -50,19 +50,18 @@ router.delete("/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "削除対象の画像が見つかりません" });
     }
 
-    // ファイルを先に削除する（失敗時は DB を触らずにエラーを返す）
-    const filePath = path.join(UPLOADS_DIR, path.basename(existingImage.url));
-    try {
-      await fs.promises.unlink(filePath);
-    } catch (unlinkError: unknown) {
-      // ファイルが既に存在しない場合（ENOENT）は問題なし、それ以外は中断する
-      if ((unlinkError as NodeJS.ErrnoException).code !== "ENOENT") {
-        return res.status(500).json({ error: "ファイルの削除に失敗しました" });
-      }
-    }
-
-    // ファイル削除が完了してから DB レコードを削除する
+    // DB レコードを先に削除する（失敗時はファイルに触らず500を返す → 整合した状態を維持）
     await prisma.image.delete({ where: { id } });
+
+    // DB 削除後にファイルをベストエフォートで削除する
+    // 失敗しても DB は既にクリーンなためユーザーには見えず、孤立ファイルとしてのみ残る
+    const filePath = path.join(UPLOADS_DIR, path.basename(existingImage.url));
+    await fs.promises.unlink(filePath).catch((err: NodeJS.ErrnoException) => {
+      if (err.code !== "ENOENT") {
+        console.error(`孤立ファイルの削除に失敗（手動クリーンアップが必要）: ${filePath}`);
+      }
+    });
+
     return res.json({ message: "画像を削除しました" });
 
   } catch (error) {
