@@ -1,13 +1,13 @@
-import path from "path";
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { prisma } from "../lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { UPLOADS_DIR } from "../lib/paths";
 
 const router = Router();
 
 const storage = multer.diskStorage({
-  destination: path.join(__dirname, "../../public/uploads"),
+  destination: UPLOADS_DIR,
   filename: (_req, file, cb) => {
     cb(null, `${Date.now()}-${file.originalname}`);
   },

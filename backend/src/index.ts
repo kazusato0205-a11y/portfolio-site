@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import express from "express";
 import cors from "cors";
+import { UPLOADS_DIR } from "./lib/paths";
 import profileRouter from "./routes/profile";
 import worksRouter from "./routes/works";
 import skillsRouter from "./routes/skills";
@@ -12,14 +13,13 @@ const app = express();
 const PORT = process.env.PORT ?? 4000;
 
 // 画像保存先ディレクトリが存在しない場合は自動作成
-const uploadsDir = path.join(__dirname, "../public/uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.join(UPLOADS_DIR, "../")));
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
