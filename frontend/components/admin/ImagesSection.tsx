@@ -51,7 +51,7 @@ export default function ImagesSection({ images, profileId }: Props) {
     setDeleteError(null);
     startTransition(async () => {
       const result = await deleteImage(imageId);
-      if (result?.error) setDeleteError(result.error);
+      if (!result.success) setDeleteError(result.error ?? "削除に失敗しました");
     });
   }
 

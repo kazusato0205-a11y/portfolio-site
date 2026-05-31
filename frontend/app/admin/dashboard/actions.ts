@@ -118,11 +118,12 @@ export async function setProfileAvatar(profileId: number, imageId: number): Prom
 }
 
 // 画像を削除（他のデータに使用中の場合は 400 エラー）
-export async function deleteImage(id: number) {
+export async function deleteImage(id: number): Promise<DeleteResult> {
   try {
     await fetchFromBackend(`/images/${id}`, { method: "DELETE" });
     revalidatePath("/admin/dashboard");
+    return { success: true };
   } catch {
-    return { error: "この画像はプロフィールまたは実績で使用中のため削除できません" };
+    return { success: false, error: "この画像はプロフィールまたは実績で使用中のため削除できません" };
   }
 }
