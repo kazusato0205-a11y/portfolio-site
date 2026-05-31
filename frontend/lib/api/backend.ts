@@ -8,18 +8,18 @@ export async function fetchFromBackend<T>(endpoint: string, options: RequestInit
   const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   const url = `${BACKEND_URL}${cleanEndpoint}`;
 
-  // FormData を body に渡す場合は Content-Type を設定しない（fetch が boundary 付きで自動セットする）
+  // FormData のときは Content-Type を付与しない（fetch が boundary 付きで自動セットする）
+  // JSON のときだけ明示的に付与し、呼び出し元のヘッダーで上書き可能にする
   const isFormData = options.body instanceof FormData;
+  const contentTypeHeader: Record<string, string> = isFormData ? {} : { "Content-Type": "application/json" };
 
   try {
     const response = await fetch(url, {
       ...options,
-      headers: isFormData
-        ? options.headers
-        : {
-            "Content-Type": "application/json",
-            ...options.headers,
-          },
+      headers: {
+        ...contentTypeHeader,
+        ...options.headers,
+      },
     });
 
     if (!response.ok) {
