@@ -6,6 +6,14 @@ import { revalidatePath } from "next/cache";
 type ActionResult = { error?: string; success?: boolean } | null;
 type DeleteResult = { success: boolean; error?: string };
 
+type ProfileCurrent = {
+  id: number;
+  name: string;
+  bio: string;
+  avatarImageId: number | null;
+  avatarImage: { id: number; url: string; filename: string } | null;
+};
+
 // プロフィール更新
 export async function updateProfile(
   id: number,
@@ -103,17 +111,17 @@ export async function uploadImage(data: { url: string; filename: string }): Prom
 }
 
 // 画像をプロフィールのアバターに設定
-export async function setProfileAvatar(profileId: number, imageId: number) {
+export async function setProfileAvatar(profileId: number, imageId: number): Promise<DeleteResult> {
   try {
-    // 現在の name・bio を保持したまま avatarImageId だけ更新する
-    const current = await fetchFromBackend<{ name: string; bio: string }>("/profile");
+    const current = await fetchFromBackend<ProfileCurrent>("/profile");
     await fetchFromBackend(`/profile/${profileId}`, {
       method: "PUT",
-      body: JSON.stringify({ name: current.name, bio: current.bio, avatarImageId: imageId }),
+      body: JSON.stringify({ ...current, avatarImageId: imageId }),
     });
     revalidatePath("/admin/dashboard");
+    return { success: true };
   } catch {
-    return { error: "アバターの設定に失敗しました" };
+    return { success: false, error: "アバターの設定に失敗しました" };
   }
 }
 
