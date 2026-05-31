@@ -34,9 +34,11 @@ export default function ImagesSection({ images, profileId }: Props) {
       const base64 = reader.result as string;
       startTransition(async () => {
         const result = await uploadImage({ url: base64, filename: file.name });
-        if (result?.error) setUploadError(result.error);
-        // 成功したらファイル入力をリセット
-        if (inputRef.current) inputRef.current.value = "";
+        if (result.success) {
+          if (inputRef.current) inputRef.current.value = "";
+        } else {
+          setUploadError(result.error ?? "アップロードに失敗しました");
+        }
       });
     };
     reader.readAsDataURL(file);
