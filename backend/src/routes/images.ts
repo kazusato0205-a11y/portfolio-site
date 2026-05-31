@@ -1,8 +1,13 @@
 import { Router, Request, Response } from "express";
+import multer from "multer";
 import { prisma } from "../lib/prisma";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client"; // 環境に応じて /library に変更してください
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const router = Router();
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 router.get("/", async (_req: Request, res: Response) => {
   try {
@@ -15,11 +20,14 @@ router.get("/", async (_req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
-  const { url, filename } = req.body;
+router.post("/", upload.single("file"), async (req: Request, res: Response) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "ファイルが見つかりません" });
+  }
+  const base64url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
   try {
     const image = await prisma.image.create({
-      data: { url, filename },
+      data: { url: base64url, filename: req.file.originalname },
     });
     res.status(201).json(image);
   } catch {
@@ -30,18 +38,15 @@ router.post("/", async (req: Request, res: Response) => {
 router.delete("/:id", async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id));
   try {
-    // 1. そもそもその画像が今もあるか確認する（404対応）
     const existingImage = await prisma.image.findUnique({ where: { id } });
     if (!existingImage) {
       return res.status(404).json({ error: "削除対象の画像が見つかりません" });
     }
 
-    // 2. 削除を実行（参照中ならここでP2003エラーが飛ぶ）
     await prisma.image.delete({ where: { id } });
     return res.json({ message: "画像を削除しました" });
 
   } catch (error) {
-    // 3. 外部キー制約エラー（他のデータが参照中）の識別
     if (error && typeof error === "object" && "code" in error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === "P2003") {
@@ -51,8 +56,6 @@ router.delete("/:id", async (req: Request, res: Response) => {
         }
       }
     }
-
-    // 4. それ以外の予期せぬシステムエラーは500を返す
     return res.status(500).json({ error: "画像の削除に失敗しました" });
   }
 });
