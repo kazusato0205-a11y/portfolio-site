@@ -4,6 +4,17 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client"; /
 
 const router = Router();
 
+router.get("/", async (_req: Request, res: Response) => {
+  try {
+    const images = await prisma.image.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(images);
+  } catch {
+    res.status(500).json({ error: "画像一覧の取得に失敗しました" });
+  }
+});
+
 router.post("/", async (req: Request, res: Response) => {
   const { url, filename } = req.body;
   try {

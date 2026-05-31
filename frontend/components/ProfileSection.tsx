@@ -28,12 +28,12 @@ export default function ProfileSection({ profile }: { profile: Profile | null })
       <div className="mx-auto max-w-3xl flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-12">
         {profile.avatarImage ? (
           <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border border-gray-200 sm:h-40 sm:w-40">
-            <Image
-              src={profile.avatarImage.url}
-              alt={profile.name}
-              fill
-              className="object-cover"
-            />
+            {profile.avatarImage.url.startsWith("data:") ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.avatarImage.url} alt={profile.name} className="h-full w-full object-cover" />
+            ) : (
+              <Image src={profile.avatarImage.url} alt={profile.name} fill className="object-cover" />
+            )}
           </div>
         ) : (
           <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-gray-100 text-4xl text-gray-300 sm:h-40 sm:w-40">
