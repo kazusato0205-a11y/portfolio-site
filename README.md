@@ -173,7 +173,7 @@ portfolio-site/
 ├── TASKS.md                         # 開発タスク一覧・進捗管理
 │
 ├── frontend/                        # Next.js（画面側）
-│   ├── middleware.ts                 # ルート保護（/admin/*）・x-pathname ヘッダー付与
+│   ├── middleware.ts                 # ルート保護（/admin/* への未認証アクセスを 404 で遮断）
 │   ├── next.config.ts               # Next.js 設定（外部画像ドメイン許可等）
 │   │
 │   ├── app/                         # App Router のページ・API ルート
@@ -189,7 +189,7 @@ portfolio-site/
 │   │   │   │   └── page.tsx         # 管理者ログインページ（Firebase 認証）
 │   │   │   └── dashboard/
 │   │   │       ├── page.tsx         # 管理ダッシュボード（コンテンツ一覧・編集）
-│   │   │       └── actions.ts       # Server Actions（CRUD 操作・ログアウト）
+│   │   │       └── actions.ts       # Server Actions（プロフィール・実績・スキル・画像の CRUD）
 │   │   │
 │   │   └── api/
 │   │       ├── auth/session/
@@ -207,7 +207,8 @@ portfolio-site/
 │   │       ├── LogoutButton.tsx     # Firebase サインアウト＋クッキー削除ボタン
 │   │       ├── ProfileEditForm.tsx  # プロフィール編集フォーム
 │   │       ├── WorksEditSection.tsx # 実績の一覧・追加・削除
-│   │       └── SkillsEditSection.tsx# スキルの一覧・追加・削除
+│   │       ├── SkillsEditSection.tsx# スキルの一覧・追加・削除
+│   │       └── ImagesSection.tsx    # 画像のアップロード・アバター設定・削除
 │   │
 │   └── lib/                         # ユーティリティ・外部サービス連携
 │       ├── api/
@@ -229,5 +230,5 @@ portfolio-site/
             ├── profile.ts           # GET・PUT  /api/profile
             ├── works.ts             # GET・POST・PUT・DELETE  /api/works
             ├── skills.ts            # GET・POST・PUT・DELETE  /api/skills
-            └── images.ts            # POST・DELETE  /api/images
+            └── images.ts            # GET・POST・DELETE  /api/images
 ```

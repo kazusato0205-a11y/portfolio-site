@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useTransition, useState } from "react";
 import { createWork, deleteWork } from "@/app/admin/dashboard/actions";
 
 type Work = {
@@ -12,6 +12,18 @@ type Work = {
 
 export default function WorksEditSection({ works }: { works: Work[] }) {
   const [state, formAction, isPending] = useActionState(createWork, null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
+  function handleDelete(id: number) {
+    setDeleteError(null);
+    startDeleteTransition(async () => {
+      const result = await deleteWork(id);
+      if (!result.success) {
+        setDeleteError(result.error ?? "削除に失敗しました");
+      }
+    });
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -19,29 +31,34 @@ export default function WorksEditSection({ works }: { works: Work[] }) {
       {works.length === 0 ? (
         <p className="text-sm text-gray-400">実績がまだ登録されていません。</p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {works.map((work) => (
-            <li
-              key={work.id}
-              className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm"
-            >
-              <div>
-                <p className="font-medium text-gray-900">{work.title}</p>
-                {work.link && (
-                  <p className="text-xs text-gray-400 mt-0.5">{work.link}</p>
-                )}
-              </div>
-              <form action={deleteWork.bind(null, work.id)}>
+        <div className="flex flex-col gap-2">
+          {deleteError && (
+            <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-500">{deleteError}</p>
+          )}
+          <ul className="flex flex-col gap-2">
+            {works.map((work) => (
+              <li
+                key={work.id}
+                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm"
+              >
+                <div className="min-w-0 flex-1 mr-3">
+                  <p className="truncate font-medium text-gray-900">{work.title}</p>
+                  {work.link && (
+                    <p className="truncate text-xs text-gray-400 mt-0.5">{work.link}</p>
+                  )}
+                </div>
                 <button
-                  type="submit"
-                  className="rounded px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors"
+                  type="button"
+                  onClick={() => handleDelete(work.id)}
+                  disabled={isDeleting}
+                  className="shrink-0 rounded px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors"
                 >
                   削除
                 </button>
-              </form>
-            </li>
-          ))}
-        </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {/* 新規追加フォーム */}

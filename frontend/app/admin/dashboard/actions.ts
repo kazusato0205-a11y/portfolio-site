@@ -4,6 +4,7 @@ import { fetchFromBackend } from "@/lib/api/backend";
 import { revalidatePath } from "next/cache";
 
 type ActionResult = { error?: string; success?: boolean } | null;
+type DeleteResult = { success: boolean; error?: string };
 
 // プロフィール更新
 export async function updateProfile(
@@ -46,9 +47,14 @@ export async function createWork(
 }
 
 // 実績を削除
-export async function deleteWork(id: number) {
-  await fetchFromBackend(`/works/${id}`, { method: "DELETE" });
-  revalidatePath("/admin/dashboard");//ページのデータを再取得して画面を更新
+export async function deleteWork(id: number): Promise<DeleteResult> {
+  try {
+    await fetchFromBackend(`/works/${id}`, { method: "DELETE" });
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+  } catch {
+    return { success: false, error: "実績の削除に失敗しました" };
+  }
 }
 
 // スキルを新規作成
@@ -72,9 +78,14 @@ export async function createSkill(
 }
 
 // スキルを削除
-export async function deleteSkill(id: number) {
-  await fetchFromBackend(`/skills/${id}`, { method: "DELETE" });
-  revalidatePath("/admin/dashboard");
+export async function deleteSkill(id: number): Promise<DeleteResult> {
+  try {
+    await fetchFromBackend(`/skills/${id}`, { method: "DELETE" });
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+  } catch {
+    return { success: false, error: "スキルの削除に失敗しました" };
+  }
 }
 
 // 画像を登録（Base64 データURLをそのまま url フィールドに保存）
@@ -114,4 +125,3 @@ export async function deleteImage(id: number) {
     return { error: "この画像はプロフィールまたは実績で使用中のため削除できません" };
   }
 }
-
