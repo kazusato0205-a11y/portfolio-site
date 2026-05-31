@@ -13,10 +13,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // layout.tsx が isAdmin 判定に使う x-pathname を注入して通過
-  const res = NextResponse.next();
-  res.headers.set("x-pathname", pathname);
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {

@@ -177,14 +177,17 @@ portfolio-site/
 │   ├── next.config.ts               # Next.js 設定（外部画像ドメイン許可等）
 │   │
 │   ├── app/                         # App Router のページ・API ルート
-│   │   ├── layout.tsx               # 全ページ共通レイアウト（Header/Footer の表示制御）
-│   │   ├── page.tsx                 # トップページ（Profile・Works・Skills を表示）
+│   │   ├── layout.tsx               # ルートレイアウト（html/body のみ・Header/Footer なし）
 │   │   ├── globals.css              # グローバルスタイル
 │   │   │
-│   │   ├── contact/
-│   │   │   └── page.tsx             # コンタクトページ（問い合わせフォーム UI）
+│   │   ├── (marketing)/             # ルートグループ：一般公開ページ（URL に影響しない）
+│   │   │   ├── layout.tsx           # 公開ページ共通レイアウト（Header・Footer を配置）
+│   │   │   ├── page.tsx             # トップページ（Profile・Works・Skills を表示）
+│   │   │   └── contact/
+│   │   │       └── page.tsx         # コンタクトページ（問い合わせフォーム UI）
 │   │   │
-│   │   ├── admin/
+│   │   ├── admin/                   # 管理者エリア（middleware で認証保護）
+│   │   │   ├── layout.tsx           # 管理画面レイアウト（Header/Footer なし）
 │   │   │   ├── login/
 │   │   │   │   └── page.tsx         # 管理者ログインページ（Firebase 認証）
 │   │   │   └── dashboard/
