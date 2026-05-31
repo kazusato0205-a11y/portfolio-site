@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { prisma } from "../lib/prisma";
@@ -49,6 +51,13 @@ router.delete("/:id", async (req: Request, res: Response) => {
     }
 
     await prisma.image.delete({ where: { id } });
+
+    // DB 削除成功後に実体ファイルも削除する
+    const filePath = path.join(UPLOADS_DIR, path.basename(existingImage.url));
+    await fs.promises.unlink(filePath).catch(() => {
+      // ファイルが既に存在しない場合は無視する
+    });
+
     return res.json({ message: "画像を削除しました" });
 
   } catch (error) {
