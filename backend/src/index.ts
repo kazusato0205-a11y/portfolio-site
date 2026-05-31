@@ -1,4 +1,5 @@
 import "dotenv/config";
+import path from "path";
 import express from "express";
 import cors from "cors";
 import profileRouter from "./routes/profile";
@@ -11,6 +12,7 @@ const PORT = process.env.PORT ?? 4000;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });

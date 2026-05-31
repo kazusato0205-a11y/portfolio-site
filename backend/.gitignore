@@ -25,3 +25,7 @@ Thumbs.db
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# アップロード済み画像（フォルダ自体は管理対象、中身は除外）
+/public/uploads/*
+!/public/uploads/.gitkeep

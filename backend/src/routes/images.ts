@@ -1,13 +1,18 @@
+import path from "path";
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { prisma } from "../lib/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 const router = Router();
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, "../../public/uploads"),
+  filename: (_req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  },
 });
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.get("/", async (_req: Request, res: Response) => {
   try {
@@ -24,10 +29,10 @@ router.post("/", upload.single("file"), async (req: Request, res: Response) => {
   if (!req.file) {
     return res.status(400).json({ error: "ファイルが見つかりません" });
   }
-  const base64url = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+  const url = `/uploads/${req.file.filename}`;
   try {
     const image = await prisma.image.create({
-      data: { url: base64url, filename: req.file.originalname },
+      data: { url, filename: req.file.originalname },
     });
     res.status(201).json(image);
   } catch {

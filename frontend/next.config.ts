@@ -1,19 +1,21 @@
 import type { NextConfig } from "next";
 
+const BACKEND_ORIGIN =
+  process.env.BACKEND_URL?.replace("/api", "") ?? "http://localhost:4000";
+
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: "5mb", // Base64 画像送信のため上限を拡張
+      bodySizeLimit: "5mb",
     },
   },
-  images: {
-    remotePatterns: [
+  async rewrites() {
+    return [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3000",
+        source: "/uploads/:path*",
+        destination: `${BACKEND_ORIGIN}/uploads/:path*`,
       },
-    ],
+    ];
   },
 };
 
