@@ -13,6 +13,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   "auth/wrong-password":        "メールアドレスまたはパスワードが正しくありません。",
   "auth/too-many-requests":     "ログイン試行が多すぎます。しばらくしてから再試行してください。",
   "auth/network-request-failed":"ネットワークエラーが発生しました。接続を確認してください。",
+  "session":                    "セッションの作成に失敗しました。もう一度お試しください。",
 };
 
 export default function AdminLoginPage() {
@@ -33,13 +34,15 @@ export default function AdminLoginPage() {
       //正しければ userCredential（ログイン証明書）が返ってくるので、そこから ID トークンを取り出す
       const token = await userCredential.user.getIdToken();
 
-      // httpOnly クッキーをサーバー側でセットする
-      //IDトークンをサーバー側の Route Handler に送り、httpOnly クッキーとして保存してもらう
-      await fetch("/api/auth/session", {
+      // IDトークンをサーバー側の Route Handler に送り、httpOnly クッキーとして保存してもらう
+      const response = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
       });
+      if (!response.ok) {
+        throw new Error("session");
+      }
 
       router.push("/admin/dashboard");
     } catch (error) {
