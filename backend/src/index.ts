@@ -1,4 +1,5 @@
 import "dotenv/config";
+import fs from "fs";
 import path from "path";
 import express from "express";
 import cors from "cors";
@@ -9,6 +10,12 @@ import imagesRouter from "./routes/images";
 
 const app = express();
 const PORT = process.env.PORT ?? 4000;
+
+// 画像保存先ディレクトリが存在しない場合は自動作成
+const uploadsDir = path.join(__dirname, "../public/uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(cors());
 app.use(express.json());
