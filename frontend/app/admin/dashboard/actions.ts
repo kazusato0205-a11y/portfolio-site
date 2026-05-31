@@ -116,7 +116,11 @@ export async function setProfileAvatar(profileId: number, imageId: number): Prom
     const current = await fetchFromBackend<ProfileCurrent>("/profile");
     await fetchFromBackend(`/profile/${profileId}`, {
       method: "PUT",
-      body: JSON.stringify({ ...current, avatarImageId: imageId }),
+      body: JSON.stringify({
+        name: current.name,
+        bio: current.bio,
+        avatarImageId: imageId,
+      }),
     });
     revalidatePath("/admin/dashboard");
     return { success: true };
