@@ -20,6 +20,10 @@ router.post("/", async (req: Request, res: Response) => {
     return res.status(400).json({ error: "name と bio は必須です" });
   }
   try {
+    const existing = await prisma.profile.findFirst();
+    if (existing) {
+      return res.status(409).json({ error: "プロフィールは既に登録されています" });
+    }
     const profile = await prisma.profile.create({
       data: { name, bio },
       include: { avatarImage: true },
