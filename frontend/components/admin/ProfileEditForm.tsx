@@ -15,12 +15,14 @@ function ProfileForm({
   state,
   defaultValues,
   submitLabel,
+  successLabel,
 }: {
   action: (payload: FormData) => void;
   isPending: boolean;
   state: { error?: string; success?: boolean } | null;
   defaultValues?: { name: string; bio: string };
   submitLabel: string;
+  successLabel: string;
 }) {
   return (
     <form action={action} className="flex flex-col gap-4">
@@ -46,7 +48,7 @@ function ProfileForm({
       </div>
 
       {state?.error   && <p className="text-sm text-red-500">{state.error}</p>}
-      {state?.success && <p className="text-sm text-green-600">保存しました</p>}
+      {state?.success && <p className="text-sm text-green-600">{successLabel}</p>}
 
       <button
         type="submit"
@@ -73,6 +75,7 @@ export default function ProfileEditForm({ profile }: { profile: Profile | null }
         isPending={isCreating}
         state={createState}
         submitLabel="登録する"
+        successLabel="登録しました"
       />
     );
   }
@@ -84,6 +87,7 @@ export default function ProfileEditForm({ profile }: { profile: Profile | null }
       state={updateState}
       defaultValues={{ name: profile.name, bio: profile.bio }}
       submitLabel="保存する"
+      successLabel="保存しました"
     />
   );
 }
