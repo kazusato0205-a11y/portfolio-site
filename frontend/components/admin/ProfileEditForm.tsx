@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { updateProfile } from "@/app/admin/dashboard/actions";
+import { updateProfile, createProfile } from "@/app/admin/dashboard/actions";
 
 type Profile = {
   id: number;
@@ -9,28 +9,27 @@ type Profile = {
   bio: string;
 };
 
-export default function ProfileEditForm({ profile }: { profile: Profile | null }) {
-  const updateProfileWithId = profile
-    ? updateProfile.bind(null, profile.id)
-    : null;
-
-  const [state, formAction, isPending] = useActionState(
-    updateProfileWithId ?? (async () => ({ error: "プロフィールが存在しません" })),
-    null
-  );
-
-  if (!profile) {
-    return <p className="text-sm text-gray-400">プロフィールがまだ登録されていません。</p>;
-  }
-
+function ProfileForm({
+  action,
+  isPending,
+  state,
+  defaultValues,
+  submitLabel,
+}: {
+  action: (payload: FormData) => void;
+  isPending: boolean;
+  state: { error?: string; success?: boolean } | null;
+  defaultValues?: { name: string; bio: string };
+  submitLabel: string;
+}) {
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={action} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-medium text-gray-700">名前</label>
         <input
           name="name"
           required
-          defaultValue={profile.name}
+          defaultValue={defaultValues?.name ?? ""}
           className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
         />
       </div>
@@ -41,7 +40,7 @@ export default function ProfileEditForm({ profile }: { profile: Profile | null }
           name="bio"
           required
           rows={4}
-          defaultValue={profile.bio}
+          defaultValue={defaultValues?.bio ?? ""}
           className="resize-none rounded-lg border border-gray-200 px-4 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
         />
       </div>
@@ -54,8 +53,37 @@ export default function ProfileEditForm({ profile }: { profile: Profile | null }
         disabled={isPending}
         className="self-start rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
       >
-        {isPending ? "保存中..." : "保存する"}
+        {isPending ? "処理中..." : submitLabel}
       </button>
     </form>
+  );
+}
+
+export default function ProfileEditForm({ profile }: { profile: Profile | null }) {
+  const [createState, createAction, isCreating] = useActionState(createProfile, null);
+  const [updateState, updateAction, isUpdating] = useActionState(
+    profile ? updateProfile.bind(null, profile.id) : async () => ({ error: "プロフィールが存在しません" }),
+    null
+  );
+
+  if (!profile) {
+    return (
+      <ProfileForm
+        action={createAction}
+        isPending={isCreating}
+        state={createState}
+        submitLabel="登録する"
+      />
+    );
+  }
+
+  return (
+    <ProfileForm
+      action={updateAction}
+      isPending={isUpdating}
+      state={updateState}
+      defaultValues={{ name: profile.name, bio: profile.bio }}
+      submitLabel="保存する"
+    />
   );
 }

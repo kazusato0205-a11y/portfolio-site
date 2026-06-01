@@ -132,23 +132,15 @@ npm run db:generate
 
 ### 4.4 開発サーバーの起動
 
-ターミナルを **2つ** 開いて、それぞれ実行します。
-
-**ターミナル① — バックエンド（Express）**
+プロジェクトルートで以下を実行すると、バックエンドとフロントエンドを **1コマンド** で同時起動できます。
 
 ```bash
-cd backend
 npm run dev
-# → http://localhost:4000 で起動
+# → backend:  http://localhost:4000
+# → frontend: http://localhost:3000
 ```
 
-**ターミナル② — フロントエンド（Next.js）**
-
-```bash
-cd frontend
-npm run dev
-# → http://localhost:3000 で起動
-```
+> 個別に起動したい場合は各ディレクトリで `npm run dev` を実行してください。
 
 ---
 
@@ -228,9 +220,10 @@ portfolio-site/
         ├── index.ts                 # Express サーバー起動・全ルーターの登録
         ├── lib/
         │   ├── prisma.ts            # Prisma クライアント初期化（DB 接続管理）
-        │   └── firebase-admin.ts    # Firebase Admin SDK 初期化（サーバー用）
+        │   ├── firebase-admin.ts    # Firebase Admin SDK 初期化（サーバー用）
+        │   └── paths.ts             # アップロードディレクトリの絶対パス定義
         └── routes/
-            ├── profile.ts           # GET・PUT  /api/profile
+            ├── profile.ts           # GET・POST・PUT  /api/profile
             ├── works.ts             # GET・POST・PUT・DELETE  /api/works
             ├── skills.ts            # GET・POST・PUT・DELETE  /api/skills
             └── images.ts            # GET・POST・DELETE  /api/images
