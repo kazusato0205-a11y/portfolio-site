@@ -14,6 +14,26 @@ router.get("/", async (_req: Request, res: Response) => {
   }
 });
 
+router.post("/", async (req: Request, res: Response) => {
+  const { name, bio } = req.body;
+  if (!name || !bio) {
+    return res.status(400).json({ error: "name と bio は必須です" });
+  }
+  try {
+    const existing = await prisma.profile.findFirst();
+    if (existing) {
+      return res.status(409).json({ error: "プロフィールは既に登録されています" });
+    }
+    const profile = await prisma.profile.create({
+      data: { name, bio },
+      include: { avatarImage: true },
+    });
+    res.status(201).json(profile);
+  } catch {
+    res.status(500).json({ error: "プロフィールの作成に失敗しました" });
+  }
+});
+
 router.put("/:id", async (req: Request, res: Response) => {
   const id = parseInt(String(req.params.id));
   const { name, bio, avatarImageId } = req.body;

@@ -7,6 +7,25 @@ type ActionResult = { error?: string; success?: boolean } | null;
 type DeleteResult = { success: boolean; error?: string };
 
 
+// プロフィール新規作成
+export async function createProfile(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const name = formData.get("name") as string;
+  const bio  = formData.get("bio")  as string;
+  try {
+    await fetchFromBackend("/profile", {
+      method: "POST",
+      body: JSON.stringify({ name, bio }),
+    });
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+  } catch {
+    return { error: "プロフィールの作成に失敗しました" };
+  }
+}
+
 // プロフィール更新
 export async function updateProfile(
   id: number,

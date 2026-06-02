@@ -14,7 +14,6 @@ export default function ContactPage() {
     e.preventDefault();
     setStatus("submitting");
 
-    // TODO: 送信処理（Resend等）を後で実装する
     await new Promise((resolve) => setTimeout(resolve, 800));
     setStatus("success");
   }

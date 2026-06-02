@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// 認証なしでアクセス可能な管理画面パス
 const PUBLIC_ADMIN_PATHS = ["/admin/login"];
 
 export function middleware(request: NextRequest) {

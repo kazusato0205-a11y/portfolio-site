@@ -14,6 +14,8 @@ export default function ImagesSection({ images, profileId }: Props) {
   const [isPending, startTransition] = useTransition();
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -22,10 +24,13 @@ export default function ImagesSection({ images, profileId }: Props) {
 
     if (file.size > 5 * 1024 * 1024) {
       setUploadError("ファイルサイズは 5MB 以下にしてください");
+      setSelectedFileName(null);
       return;
     }
 
     setUploadError(null);
+    setUploadSuccess(false);
+    setSelectedFileName(file.name);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -34,6 +39,9 @@ export default function ImagesSection({ images, profileId }: Props) {
       const result = await uploadImage(formData);
       if (result.success) {
         if (inputRef.current) inputRef.current.value = "";
+        setSelectedFileName(null);
+        setUploadSuccess(true);
+        setTimeout(() => setUploadSuccess(false), 2000);
       } else {
         setUploadError(result.error ?? "アップロードに失敗しました");
       }
@@ -62,13 +70,25 @@ export default function ImagesSection({ images, profileId }: Props) {
         <p className="text-sm text-gray-500">画像ファイルを選択してください（5MB 以下）</p>
         <input
           ref={inputRef}
+          id="image-upload"
           type="file"
           accept="image/*"
           onChange={handleFileChange}
           disabled={isPending}
-          className="text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100 disabled:opacity-50"
+          className="sr-only"
         />
-        {isPending && <p className="text-sm text-gray-400">アップロード中...</p>}
+        <div className="flex items-center gap-3">
+          <label
+            htmlFor="image-upload"
+            className="cursor-pointer rounded-lg bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-100 transition-colors aria-disabled:opacity-50"
+            aria-disabled={isPending}
+          >
+            ファイルを選択
+          </label>
+          <span className={`text-sm ${uploadSuccess ? "text-green-600" : "text-gray-400"}`}>
+            {uploadSuccess ? "アップロードしました" : (selectedFileName ?? "選択されていません")}
+          </span>
+        </div>
         {uploadError && <p className="text-sm text-red-500">{uploadError}</p>}
       </div>
 
