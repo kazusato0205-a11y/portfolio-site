@@ -165,7 +165,7 @@ portfolio-site/
 ├── TASKS.md                         # 開発タスク一覧・進捗管理
 │
 ├── frontend/                        # Next.js（画面側）
-│   ├── middleware.ts                 # ルート保護（/admin/* への未認証アクセスを 404 で遮断）
+│   ├── proxy.ts                      # ルート保護（/admin/* への未認証アクセスを 404 で遮断）※Next.js 16 では middleware.ts ではなく proxy.ts が規約
 │   ├── next.config.ts               # Next.js 設定（外部画像ドメイン許可等）
 │   │
 │   ├── app/                         # App Router のページ・API ルート

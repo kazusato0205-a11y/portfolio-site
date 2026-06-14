@@ -53,3 +53,35 @@
 外部サーバーへのデプロイ（本番公開）はスコープ外とし、コードの品質と設計の美しさを最優先に仕上げます。
 
 ## 📅 予備日（ADVANCE課題できたら） 6/3（水）
+
+---
+
+## 🚀 フェーズ6：ブラッシュアップ
+
+### 優先度 高
+
+- [ ] 6.1 Works編集機能の追加
+  - [ ] `updateWork` Server Actionの追加（`actions.ts`）
+  - [ ] `WorksEditSection.tsx` に編集フォーム（インライン）を追加
+- [ ] 6.2 Worksの項目追加（使用技術・開発担当）
+  - [ ] Prismaスキーマに `techStack`・`role` カラムを追加
+  - [ ] マイグレーション実行
+  - [ ] バックエンド `routes/works.ts` のGET/POST/PUTを更新
+  - [ ] `createWork`・`updateWork` Server Actionに項目を追加
+  - [ ] 管理画面フォームに入力欄を追加
+  - [ ] 公開ページ `WorksSection.tsx` に表示を追加
+
+### 優先度 中
+
+- [ ] 6.3 Skills編集機能の追加
+  - [ ] `updateSkill` Server Actionの追加（`actions.ts`）
+  - [ ] `SkillsEditSection.tsx` に編集フォームを追加
+- [ ] 6.4 Worksの並び順変更機能
+  - [ ] Prismaスキーマに `order` カラムを追加
+  - [ ] 管理画面で上下ボタンによる並び替えを実装
+
+### 優先度 低
+
+- [ ] 6.5 コンタクトフォームの送信機能実装
+  - [ ] メール送信サービス（SendGridなど）の選定・導入
+  - [ ] Server Actionでメール送信処理を実装
