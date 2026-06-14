@@ -66,6 +66,27 @@ export async function createWork(
   }
 }
 
+// 実績を更新
+export async function updateWork(
+  id: number,
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const title       = formData.get("title")       as string;
+  const description = formData.get("description") as string;
+  const link        = (formData.get("link") as string) || null;
+  try {
+    await fetchFromBackend(`/works/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ title, description, link }),
+    });
+    revalidatePath("/admin/dashboard");
+    return { success: true };
+  } catch {
+    return { error: "実績の更新に失敗しました" };
+  }
+}
+
 // 実績を削除
 export async function deleteWork(id: number): Promise<DeleteResult> {
   try {
