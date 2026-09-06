@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useTransition, useState, useEffect } from "react";
-import { createWork, deleteWork } from "@/app/admin/dashboard/actions";
+import { createWork, updateWork, deleteWork } from "@/app/admin/dashboard/actions";
 
 type Work = {
   id: number;
@@ -57,8 +57,67 @@ function AddWorkForm({ onSuccess }: { onSuccess: () => void }) {
   );
 }
 
+function EditWorkForm({ work, onClose }: { work: Work; onClose: () => void }) {
+  const updateWorkWithId = updateWork.bind(null, work.id);
+  const [state, formAction, isPending] = useActionState(updateWorkWithId, null);
+
+  useEffect(() => {
+    if (!state?.success) return;
+    const timer = setTimeout(onClose, 1000);
+    return () => clearTimeout(timer);
+  }, [state, onClose]);
+
+  return (
+    <form action={formAction} className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+      <input
+        name="title"
+        required
+        defaultValue={work.title}
+        placeholder="タイトル"
+        className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+      />
+      <textarea
+        name="description"
+        required
+        rows={6}
+        defaultValue={work.description}
+        placeholder="説明"
+        className="resize-none rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+      />
+      <input
+        name="link"
+        type="url"
+        defaultValue={work.link ?? ""}
+        placeholder="リンク（任意）"
+        className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition"
+      />
+
+      {state?.error   && <p className="text-sm text-red-500">{state.error}</p>}
+      {state?.success && <p className="text-sm text-green-600">更新しました</p>}
+
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={isPending}
+          className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-medium text-white hover:bg-blue-500 disabled:opacity-50 transition-colors"
+        >
+          {isPending ? "更新中..." : "保存する"}
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-lg border border-gray-200 bg-white px-5 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          キャンセル
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function WorksEditSection({ works }: { works: Work[] }) {
   const [formKey, setFormKey] = useState(0);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isDeleting, startDeleteTransition] = useTransition();
 
@@ -84,24 +143,36 @@ export default function WorksEditSection({ works }: { works: Work[] }) {
           )}
           <ul className="flex flex-col gap-2">
             {works.map((work) => (
-              <li
-                key={work.id}
-                className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm"
-              >
-                <div className="min-w-0 flex-1 mr-3">
-                  <p className="truncate font-medium text-gray-900">{work.title}</p>
-                  {work.link && (
-                    <p className="truncate text-xs text-gray-400 mt-0.5">{work.link}</p>
-                  )}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(work.id)}
-                  disabled={isDeleting}
-                  className="shrink-0 rounded px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors"
-                >
-                  削除
-                </button>
+              <li key={work.id} className="flex flex-col gap-2">
+                {editingId === work.id ? (
+                  <EditWorkForm work={work} onClose={() => setEditingId(null)} />
+                ) : (
+                  <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm">
+                    <div className="min-w-0 flex-1 mr-3">
+                      <p className="truncate font-medium text-gray-900">{work.title}</p>
+                      {work.link && (
+                        <p className="truncate text-xs text-gray-400 mt-0.5">{work.link}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setEditingId(work.id)}
+                        className="rounded px-3 py-1 text-xs font-medium text-blue-500 hover:bg-blue-50 transition-colors"
+                      >
+                        編集
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(work.id)}
+                        disabled={isDeleting}
+                        className="rounded px-3 py-1 text-xs font-medium text-red-500 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                      >
+                        削除
+                      </button>
+                    </div>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
