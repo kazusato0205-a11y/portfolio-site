@@ -48,7 +48,7 @@ export default function WorksSection({ works }: { works: Work[] }) {
                   <h3 className="text-base font-semibold text-gray-900">
                     {work.title}
                   </h3>
-                  <p className="flex-1 text-sm leading-relaxed text-gray-600">
+                  <p className="flex-1 whitespace-pre-line text-sm leading-relaxed text-gray-600">
                     {work.description}
                   </p>
                   {work.link && (
