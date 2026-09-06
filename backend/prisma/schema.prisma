@@ -4,10 +4,11 @@ generator client {
   output   = "../src/generated/prisma"
 }
 
-// 2. データベース（倉庫）への接続設定（環境変数から読み込む）
+// 2. データベース（倉庫）への接続設定
+// Prisma 7 では接続URLを prisma.config.ts の datasource.url で指定する
+// （実行時は src/lib/prisma.ts の driver adapter が DATABASE_URL を直接利用）
 datasource db {
-  provider = "postgresql" 
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 // ==========================================
