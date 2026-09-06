@@ -2,15 +2,15 @@ import Link from "next/link";
 
 export default function Header() {
   return (
-    <header className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between">
-      <Link href="/" className="text-xl font-semibold text-blue-600 tracking-tight hover:text-blue-500 transition-colors">
+    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200/70 bg-white/80 px-8 py-4 backdrop-blur-md">
+      <Link href="/" className="text-xl font-bold tracking-tight text-blue-600 transition-colors hover:text-blue-500">
         Portfolio
       </Link>
-      <nav className="flex gap-8 text-sm font-medium text-gray-600">
-        <Link href="/" className="hover:text-blue-600 transition-colors">
+      <nav className="flex gap-8 text-sm font-medium text-slate-600">
+        <Link href="/" className="transition-colors hover:text-blue-600">
           Home
         </Link>
-        <Link href="/contact" className="hover:text-blue-600 transition-colors">
+        <Link href="/contact" className="transition-colors hover:text-blue-600">
           Contact
         </Link>
       </nav>

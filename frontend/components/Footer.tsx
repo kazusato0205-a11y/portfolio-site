@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-200 text-center py-6 text-sm text-gray-400 mt-auto">
+    <footer className="mt-auto border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-400">
       <p>© 2026 Portfolio Site. All rights reserved.</p>
     </footer>
   );
