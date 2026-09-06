@@ -24,10 +24,20 @@ export default function ProfileSection({ profile }: { profile: Profile | null })
   }
 
   return (
-    <section className="py-24 px-8">
-      <div className="mx-auto max-w-3xl flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-12">
+    <section className="relative overflow-hidden bg-gradient-to-b from-blue-200 via-indigo-100 to-slate-50 py-28 px-8">
+      {/* 装飾用のぼかし円 */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-blue-300/50 blur-3xl"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-indigo-300/50 blur-3xl"
+      />
+
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-8 sm:flex-row sm:items-start sm:gap-12">
         {profile.avatarImage ? (
-          <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border border-gray-200 sm:h-40 sm:w-40">
+          <div className="relative h-32 w-32 shrink-0 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg shadow-blue-100 sm:h-40 sm:w-40">
             {profile.avatarImage.url.startsWith("data:") ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={profile.avatarImage.url} alt={profile.name} className="h-full w-full object-cover" />
@@ -36,16 +46,18 @@ export default function ProfileSection({ profile }: { profile: Profile | null })
             )}
           </div>
         ) : (
-          <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full bg-gray-100 text-4xl text-gray-300 sm:h-40 sm:w-40">
+          <div className="flex h-32 w-32 shrink-0 items-center justify-center rounded-full border-4 border-white bg-gray-100 text-4xl text-gray-300 shadow-lg shadow-blue-100 sm:h-40 sm:w-40">
             {profile.name.charAt(0)}
           </div>
         )}
 
         <div className="flex flex-col gap-4 text-center sm:text-left">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             {profile.name}
           </h1>
-          <p className="text-base leading-relaxed text-gray-600">{profile.bio}</p>
+          <p className="max-w-prose text-base leading-relaxed text-slate-600">
+            {profile.bio}
+          </p>
         </div>
       </div>
     </section>
