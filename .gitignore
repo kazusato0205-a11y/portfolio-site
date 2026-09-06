@@ -9,6 +9,8 @@ Thumbs.db
 .env
 .env.*
 *.local
+!.env.example
+!*/.env.example
 
 # 証明書・秘密鍵
 *.pem
