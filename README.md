@@ -12,6 +12,24 @@
 
 > 掲載中のプロフィール画像・実績（Works）の画像は、データベースとローカルの `backend/public/uploads/` に保存されており、リポジトリには含まれません。`git clone` した環境では管理画面から登録し直す必要があります。
 
+## 画面イメージ
+
+### トップページ（プロフィール / Works / Skills）
+
+![トップページ](docs/screenshots/home.png)
+
+### Works — 作品名をクリックすると詳細（概要・担当・使用技術・工夫した点）が開く
+
+![Works セクション](docs/screenshots/works.png)
+
+### Skills — カテゴリ別・習熟度表示
+
+![Skills セクション](docs/screenshots/skills.png)
+
+### 管理者ログイン（Firebase Authentication）
+
+![管理者ログイン](docs/screenshots/admin-login.png)
+
 ## 1. 要件定義
 
 ### 1.1 目的
